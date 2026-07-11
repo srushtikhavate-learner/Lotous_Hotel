@@ -221,6 +221,12 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(196,106,58,0.18);
         }
+        .invalid-feedback-custom {
+            color: #d9534f;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            display: none;
+        }
 
         /* FOOTER */
         footer {
@@ -513,11 +519,35 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold" for="guestEmail">Email</label>
-                            <input type="email" class="form-control" id="guestEmail" placeholder="Enter your email" required />
+                            <input
+                                type="email"
+                                class="form-control"
+                                id="guestEmail"
+                                placeholder="Enter your email"
+                                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                title="Please enter a valid email address (e.g. name@example.com)"
+                                oninput="document.getElementById('emailError').style.display = (this.value.length > 0 && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(this.value)) ? 'block' : 'none';"
+                                required
+                            />
+                            <div id="emailError" class="invalid-feedback-custom">Please enter a valid email address (e.g. name@example.com).</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold" for="guestPhone">Phone Number</label>
-                            <input type="tel" class="form-control" id="guestPhone" placeholder="Enter your phone number" required />
+                            <input
+                                type="tel"
+                                class="form-control"
+                                id="guestPhone"
+                                placeholder="Enter your 10-digit phone number"
+                                maxlength="10"
+                                inputmode="numeric"
+                                pattern="[0-9]{10}"
+                                title="Please enter a valid 10-digit phone number (numbers only)"
+                                onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10); document.getElementById('phoneError').style.display = (this.value.length > 0 && this.value.length < 10) ? 'block' : 'none';"
+                                onpaste="setTimeout(() => { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10); }, 0)"
+                                required
+                            />
+                            <div id="phoneError" class="invalid-feedback-custom">Phone number must be exactly 10 digits.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold" for="roomType">Room Type</label>
@@ -586,6 +616,22 @@ function sendWhatsApp() {
 
     if (!name || !email || !phone || !room || !checkin || !checkout || !guests) {
         alert('⚠️ Please fill in all required fields before sending.');
+        return false;
+    }
+
+    // Extra safety check: email must be a valid format
+    var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(email)) {
+        alert('⚠️ Please enter a valid email address (e.g. name@example.com).');
+        document.getElementById('guestEmail').focus();
+        return false;
+    }
+
+    // Extra safety check: phone must be exactly 10 digits, numbers only
+    var phoneDigitsOnly = /^[0-9]{10}$/;
+    if (!phoneDigitsOnly.test(phone)) {
+        alert('⚠️ Please enter a valid 10-digit phone number using numbers only (no letters or symbols).');
+        document.getElementById('guestPhone').focus();
         return false;
     }
 
